@@ -308,6 +308,33 @@
   .cta-section .sub { margin: 20px auto 38px; color: var(--ink-dim); font-size: 16.5px; max-width: 46ch; }
   .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
   .status-pill { margin-top: 22px; display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; }
+
+  /* ---- lista de espera ---- */
+  .waitlist { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 0 auto; max-width: 520px; }
+  .waitlist-input {
+    flex: 1 1 260px; min-width: 0;
+    font-family: var(--font-body); font-size: 15px; color: var(--ink);
+    background: var(--bg-raised); border: 1px solid var(--line-strong);
+    border-radius: 999px; padding: 14px 22px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .waitlist-input::placeholder { color: var(--ink-faint); }
+  .waitlist-input:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-wash);
+  }
+  .waitlist-fine {
+    margin: 14px auto 0; max-width: 46ch;
+    font-size: 13px; line-height: 1.55; color: var(--ink-faint);
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  @media (max-width: 620px) {
+    .waitlist { flex-direction: column; }
+    .waitlist .btn { width: 100%; }
+  }
   .status-pill .blip { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); animation: blip 1.8s ease-in-out infinite; }
   @keyframes blip { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
 
@@ -871,7 +898,7 @@
       <h2>Não é promessa. É teste.</h2>
     </div>
     <div class="stats-grid">
-      <div class="stat"><div class="n">109</div><div class="l">testes automatizados no motor, na anamnese e na persistência</div></div>
+      <div class="stat"><div class="n">146</div><div class="l">testes automatizados no motor, na anamnese e na persistência</div></div>
       <div class="stat"><div class="n">1.000</div><div class="l">perfis aleatórios gerados e verificados a cada commit</div></div>
       <div class="stat"><div class="n">0</div><div class="l">chamadas de rede — o motor roda inteiro no seu aparelho</div></div>
       <div class="stat"><div class="n">100%</div><div class="l">dos seus dados ficam no aparelho. Sem login, sem nuvem</div></div>
@@ -943,11 +970,50 @@
     <span class="eyebrow">Comece por você</span>
     <h2 style="margin-top:18px;">Sua próxima ficha não vai ser copiada de ninguém.</h2>
     <p class="sub">Responda a anamnese uma vez. Carregue o plano com você, mesmo sem sinal.</p>
-    <div class="cta-actions">
-      <a class="btn btn-primary" href="#hero">Começar minha anamnese</a>
+    <!--
+      Lista de espera. O endpoint do Buttondown é público de propósito (é feito
+      para formulário no navegador) — não coloque chave de API aqui.
+
+      Precisa ser um <form> de verdade, com POST, e não fetch: o Buttondown pode
+      responder com CAPTCHA ou erro de validação, e a pessoa precisa ver essa
+      resposta. O target="_blank" abre a confirmação numa aba nova e mantém a
+      landing aberta atrás.
+    -->
+    <form class="waitlist"
+          action="https://buttondown.com/api/emails/embed-subscribe/spott.ia"
+          method="post"
+          target="_blank">
+      <input type="hidden" name="embed" value="1">
+      <!--
+        Etiqueta aplicada automaticamente a quem se inscreve por aqui. O
+        Buttondown cria a etiqueta sozinho na primeira inscrição. Serve para
+        você filtrar depois ("quem veio da landing") e para disparar e-mail só
+        para um grupo: ao escrever a newsletter, em audiência escolha
+        "Custom…" > "Tag" > lista-de-espera.
+      -->
+      <input type="hidden" name="tag" value="lista-de-espera">
+      <label class="sr-only" for="wl-email">Seu e-mail</label>
+      <input class="waitlist-input"
+             id="wl-email"
+             type="email"
+             name="email"
+             required
+             autocomplete="email"
+             inputmode="email"
+             placeholder="seu@email.com">
+      <button class="btn btn-primary" type="submit">Quero testar primeiro</button>
+    </form>
+
+    <p class="waitlist-fine">
+      Você recebe um aviso quando os testes abrirem e, no máximo, notas de atualização do
+      desenvolvimento. Sem propaganda, sem repassar seu e-mail para ninguém — e é um clique
+      para sair da lista.
+    </p>
+
+    <div class="cta-actions" style="margin-top:28px;">
       <a class="btn btn-ghost" href="#como-funciona">Entender o motor primeiro</a>
     </div>
-    <div class="status-pill"><span class="blip"></span>Em desenvolvimento — sem data de lançamento ainda</div>
+    <div class="status-pill"><span class="blip"></span>v0.1 disponível em 16/10</div>
   </div>
 </section>
 
