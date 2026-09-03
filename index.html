@@ -328,6 +328,12 @@
     font-size: 13px; line-height: 1.55; color: var(--ink-faint);
   }
   .waitlist-sink { display: none; }
+  /*
+    O atributo hidden esconde via display:none da folha do navegador, que perde
+    para qualquer display declarado aqui. Sem estas regras, .waitlist (flex) e
+    .waitlist-done (flex) ignoram o hidden e aparecem as duas de uma vez.
+  */
+  .waitlist[hidden], .waitlist-fine[hidden], .waitlist-done[hidden] { display: none; }
   /* Ocupa o lugar do formulário depois do envio — a pessoa não sai da página. */
   .waitlist-done {
     margin: 0 auto; max-width: 520px;
