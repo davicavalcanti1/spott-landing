@@ -327,6 +327,21 @@
     margin: 14px auto 0; max-width: 46ch;
     font-size: 13px; line-height: 1.55; color: var(--ink-faint);
   }
+  .waitlist-sink { display: none; }
+  /* Ocupa o lugar do formulário depois do envio — a pessoa não sai da página. */
+  .waitlist-done {
+    margin: 0 auto; max-width: 520px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    background: var(--accent-wash); border: 1px solid var(--accent);
+    border-radius: 20px; padding: 26px 24px;
+  }
+  .waitlist-done .done-head {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-display); font-size: 20px; color: var(--ink);
+    text-align: center;
+  }
+  .waitlist-done .done-head svg { flex: none; }
+  .waitlist-done .eyebrow { color: var(--accent-soft); font-size: 11.5px; text-align: center; }
   .sr-only {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -975,14 +990,17 @@
       para formulário no navegador) — não coloque chave de API aqui.
 
       Precisa ser um <form> de verdade, com POST, e não fetch: o Buttondown pode
-      responder com CAPTCHA ou erro de validação, e a pessoa precisa ver essa
-      resposta. O target="_blank" abre a confirmação numa aba nova e mantém a
-      landing aberta atrás.
+      responder com CAPTCHA ou erro de validação.
+
+      Sem JavaScript, o formulário navega para a resposta do Buttondown (o
+      comportamento padrão dele). Com JavaScript, o script no fim do arquivo
+      redireciona a resposta para um iframe escondido e mostra a confirmação
+      aqui mesmo — a pessoa não sai da landing.
     -->
     <form class="waitlist"
+          id="waitlist-form"
           action="https://buttondown.com/api/emails/embed-subscribe/spott.ia"
-          method="post"
-          target="_blank">
+          method="post">
       <input type="hidden" name="embed" value="1">
       <!--
         Etiqueta aplicada automaticamente a quem se inscreve por aqui. O
@@ -1004,11 +1022,24 @@
       <button class="btn btn-primary" type="submit">Quero testar primeiro</button>
     </form>
 
-    <p class="waitlist-fine">
+    <iframe class="waitlist-sink" name="waitlist-sink" title="Resposta da inscrição" tabindex="-1" aria-hidden="true"></iframe>
+
+    <p class="waitlist-fine" id="waitlist-fine">
       Você recebe um aviso quando os testes abrirem e, no máximo, notas de atualização do
       desenvolvimento. Sem propaganda, sem repassar seu e-mail para ninguém — e é um clique
       para sair da lista.
     </p>
+
+    <div class="waitlist-done" id="waitlist-done" role="status" hidden>
+      <span class="done-head">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9.2" stroke="#6cb4ff" stroke-width="1.8"/>
+          <path d="M7.8 12.4l2.9 2.9L16.4 9.6" stroke="#6cb4ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Pronto, você está na lista.
+      </span>
+      <span class="eyebrow">Sem spam · Só aviso de lançamento · v0.1 em 16/10</span>
+    </div>
 
     <div class="cta-actions" style="margin-top:28px;">
       <a class="btn btn-ghost" href="#como-funciona">Entender o motor primeiro</a>
@@ -1045,5 +1076,45 @@
     </div>
   </div>
 </footer>
+
+<script>
+  /*
+    Lista de espera: troca o formulário pela confirmação, sem sair da página.
+
+    O envio continua sendo um POST de formulário de verdade (não fetch), porque
+    o Buttondown pode responder com CAPTCHA ou erro de validação e o navegador
+    precisa poder seguir essa resposta. A diferença é que a resposta cai num
+    iframe escondido em vez de trocar a página.
+
+    Progressivo de propósito: o `target` só é aplicado se este script rodar. Sem
+    JavaScript, o formulário funciona do jeito padrão (navega para a resposta do
+    Buttondown) em vez de parecer que nada aconteceu.
+
+    Limite honesto: a resposta vem de outro domínio, então não há como ler daqui
+    se a inscrição deu certo. A confirmação é otimista — por isso o texto fala de
+    conferir o e-mail em vez de afirmar que está tudo pronto no servidor.
+  */
+  (function () {
+    var form = document.getElementById('waitlist-form');
+    var fine = document.getElementById('waitlist-fine');
+    var done = document.getElementById('waitlist-done');
+    if (!form || !done) return;
+
+    form.target = 'waitlist-sink';
+
+    form.addEventListener('submit', function () {
+      var email = form.querySelector('input[name="email"]');
+      if (email && !email.checkValidity()) return; // deixa o navegador reclamar
+
+      // Espera o envio sair antes de remover o formulário do caminho.
+      window.setTimeout(function () {
+        form.hidden = true;
+        if (fine) fine.hidden = true;
+        done.hidden = false;
+        done.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }, 150);
+    });
+  })();
+</script>
 </body>
 </html>
